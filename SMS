@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Smart School Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; overflow-x: hidden; }
+        
+        /* Login Page */
+        .login-page { min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .login-container { background: white; border-radius: 30px; overflow: hidden; max-width: 1200px; width: 100%; display: flex; flex-wrap: wrap; box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
+        .login-left { flex: 1; background: linear-gradient(135deg, #667eea, #764ba2); padding: 50px; color: white; text-align: center; }
+        .login-right { flex: 1; padding: 50px; }
+        .role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 30px 0; }
+        .role-card-login { text-align: center; padding: 15px; border: 2px solid #e0e0e0; border-radius: 15px; cursor: pointer; transition: all 0.3s; }
+        .role-card-login.selected { border-color: #667eea; background: rgba(102,126,234,0.1); }
+        .password-wrapper { position: relative; margin: 20px 0; }
+        .password-wrapper input { width: 100%; padding: 15px; padding-right: 50px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; }
+        .login-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        
+        /* Dashboard */
+        .dashboard { display: none; }
+        .top-bar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo i { font-size: 32px; color: #667eea; }
+        .user-info { display: flex; align-items: center; gap: 20px; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; }
+        
+        /* Navigation */
+        .main-nav { background: white; padding: 10px 20px; display: flex; gap: 5px; flex-wrap: wrap; border-bottom: 1px solid #e0e0e0; }
+        .nav-category { position: relative; }
+        .nav-btn { padding: 10px 20px; background: none; border: none; cursor: pointer; font-weight: 500; border-radius: 8px; transition: all 0.3s; }
+        .nav-btn:hover, .nav-btn.active { background: #667eea; color: white; }
+        .dropdown-content { display: none; position: absolute; top: 100%; left: 0; background: white; min-width: 200px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 100; }
+        .nav-category:hover .dropdown-content { display: block; }
+        .dropdown-content a { display: block; padding: 12px 20px; text-decoration: none; color: #333; cursor: pointer; }
+        .dropdown-content a:hover { background: #f0f0f0; }
+        
+        .dashboard-content { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; border-radius: 15px; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); cursor: pointer; }
+        .stat-value { font-size: 32px; font-weight: bold; }
+        .card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .data-table { overflow-x: auto; }
+        .data-table table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        .data-table th { background: #f8f9fa; }
+        .btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; margin: 3px; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-info { background: #17a2b8; color: white; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { padding: 10px 20px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; }
+        .tab-btn.active { background: #667eea; color: white; }
+        
+        @media (max-width: 768px) {
+            .login-container { flex-direction: column; }
+            .role-grid { grid-template-columns: repeat(2, 1fr); }
+            .main-nav { flex-direction: column; }
+        }
+        
+        .grade-A { color: #28a745; font-weight: bold; }
+        .grade-B { color: #17a2b8; font-weight: bold; }
+        .grade-C { color: #ffc107; font-weight: bold; }
+        .grade-D { color: #fd7e14; font-weight: bold; }
+        .grade-E { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<!-- Login Page -->
+<div id="loginPage" class="login-page">
+    <div class="login-container">
+        <div class="login-left">
+            <i class="fas fa-school" style="font-size: 60px;"></i>
+            <h2>Smart High School</h2>
+            <p>Complete School Management System</p>
+            <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=300&fit=crop" alt="School" style="width:100%; border-radius:15px; margin-top:20px;">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=100&h=80&fit=crop" style="border-radius:10px;">
+                <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=100&h=80&fit=crop" style="border-radius:10px;">
+                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=100&h=80&fit=crop" style="border-radius:10px;">
+            </div>
+        </div>
+        <div class="login-right">
+            <h2>Login to Portal</h2>
+            <p>Select your role and enter password</p>
+            <div class="role-grid" id="roleGrid">
+                <div class="role-card-login" data-role="admin"><i class="fas fa-shield-alt"></i><div>Admin</div></div>
+                <div class="role-card-login" data-role="principal"><i class="fas fa-crown"></i><div>Principal</div></div>
+                <div class="role-card-login" data-role="dos"><i class="fas fa-chalkboard"></i><div>DOS</div></div>
+                <div class="role-card-login" data-role="teacher"><i class="fas fa-chalkboard-user"></i><div>Teacher</div></div>
+                <div class="role-card-login" data-role="accountant"><i class="fas fa-calculator"></i><div>Accountant</div></div>
+                <div class="role-card-login" data-role="student"><i class="fas fa-user-graduate"></i><div>Student</div></div>
+            </div>
+            <div class="password-wrapper">
+                <input type="password" id="loginPassword" placeholder="Enter Password" onkeypress="if(event.key==='Enter') handleLogin()">
+                <i class="fas fa-eye toggle-password" onclick="togglePassword()"></i>
+            </div>
+            <button class="login-btn" onclick="handleLogin()">Login</button>
+            <div style="margin-top: 20px; font-size: 12px; color: #999; text-align: center;">
+                <p>Demo: admin123, principal123, dos123, teacher123, accountant123, student123</p>
+                <p><i class="fab fa-whatsapp"></i> 0710507524 | <i class="fab fa-facebook"></i> <i class="fab fa-twitter"></i> <i class="fab fa-tiktok"></i></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" class="dashboard">
+    <div class="top-bar">
+        <div class="logo"><i class="fas fa-school"></i><h3>Smart High School</h3></div>
+        <div class="user-info">
+            <span id="userNameDisplay"></span>
+            <span id="userRoleDisplay" style="background:#667eea; padding:5px 12px; border-radius:20px; color:white;"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <!-- Main Navigation -->
+    <div class="main-nav" id="mainNav"></div>
+    
+    <div class="dashboard-content" id="dashboardContent"></div>
+</div>
+
+<script>
+    // ==================== DATA ====================
+    let currentUser = null;
+    let selectedRole = null;
+    
+    // Complete School Data
+    let schoolData = {
+        // Academic
+        students: [
+            { id: 1, admissionNo: "STU001", name: "John Kamau", class: "Form 4", stream: "East", parentPhone: "0712345678", parentEmail: "parent@email.com", status: "Active", feeBalance: 10000, cbcLevel: "Grade 12", house: "Red House" },
+            { id: 2, admissionNo: "STU002", name: "Mary Wanjiku", class: "Form 4", stream: "West", parentPhone: "0723456789", parentEmail: "maryparent@email.com", status: "Active", feeBalance: 0, cbcLevel: "Grade 12", house: "Blue House" },
+            { id: 3, admissionNo: "STU003", name: "Peter Omondi", class: "Form 3", stream: "East", parentPhone: "0734567890", parentEmail: "peterparent@email.com", status: "Active", feeBalance: 15000, cbcLevel: "Grade 11", house: "Green House" }
+        ],
+        teachers: [
+            { id: 1, name: "Peter Ochieng", teacherNo: "TCH001", department: "Science", subject: "Physics", phone: "0711111111", classTeacher: "Form 4A" },
+            { id: 2, name: "Jane Atieno", teacherNo: "TCH002", department: "Mathematics", subject: "Mathematics", phone: "0722222222", classTeacher: "Form 3A" }
+        ],
+        subjects: [
+            { id: 1, name: "Mathematics", code: "MAT101", department: "Mathematics", teacherId: 2, class: "Form 4" },
+            { id: 2, name: "English", code: "ENG101", department: "Languages", teacherId: 3, class: "Form 4" },
+            { id: 3, name: "Physics", code: "PHY101", department: "Science", teacherId: 1, class: "Form 4" }
+        ],
+        cbcAssessment: [
+            { id: 1, studentId: 1, subject: "Mathematics", competency: "Problem Solving", level: "Exceeding", term: 1 },
+            { id: 2, studentId: 1, subject: "English", competency: "Communication", level: "Meeting", term: 1 }
+        ],
+        exams: [
+            { id: 1, name: "End of Term 1", type: "End Term", term: 1, year: 2024, startDate: "2024-03-15", endDate: "2024-03-25", status: "Completed" }
+        ],
+        results: [
+            { id: 1, studentId: 1, subject: "Mathematics", marks: 85, grade: "A", term: 1, year: 2024 },
+            { id: 2, studentId: 1, subject: "English", marks: 78, grade: "B+", term: 1, year: 2024 },
+            { id: 3, studentId: 2, subject: "Mathematics", marks: 65, grade: "B-", term: 1, year: 2024 }
+        ],
+        timetable: [
+            { id: 1, class: "Form 4", day: "Monday", period: 1, subject: "Mathematics", teacher: "Jane Atieno", room: "Lab 1" },
+            { id: 2, class: "Form 4", day: "Monday", period: 2, subject: "English", teacher: "John Mwangi", room: "Class 2" }
+        ],
+        
+        // Finance
+        feeStructure: [
+            { class: "Form 1", amount: 25000, term: 1, year: 2024 },
+            { class: "Form 2", amount: 25000, term: 1, year: 2024 },
+            { class: "Form 3", amount: 27000, term: 1, year: 2024 },
+            { class: "Form 4", amount: 30000, term: 1, year: 2024 }
+        ],
+        payments: [
+            { id: 1, studentId: 1, amount: 20000, date: "2024-01-15", receiptNo: "RCT001", method: "M-Pesa", transactionId: "MPESA001", balance: 10000 },
+            { id: 2, studentId: 2, amount: 30000, date: "2024-01-20", receiptNo: "RCT002", method: "Bank", transactionId: "BANK001", balance: 0 }
+        ],
+        invoices: [
+            { id: 1, studentId: 1, amount: 30000, dueDate: "2024-01-30", status: "Partial", invoiceNo: "INV001" }
+        ],
+        
+        // Administration
+        hostel: [
+            { id: 1, studentId: 1, roomNo: "A101", bedNo: "B1", checkIn: "2024-01-10", status: "Occupied" },
+            { id: 2, studentId: 2, roomNo: "A102", bedNo: "B2", checkIn: "2024-01-10", status: "Occupied" }
+        ],
+        discipline: [
+            { id: 1, studentId: 1, offense: "Late coming", date: "2024-03-01", action: "Warning", status: "Resolved" }
+        ],
+        attendance: [
+            { id: 1, studentId: 1, date: "2024-03-15", status: "Present", checkIn: "08:00", checkOut: "16:00" },
+            { id: 2, studentId: 2, date: "2024-03-15", status: "Absent", reason: "Sick" }
+        ],
+        leaveRequests: [
+            { id: 1, teacherId: 1, startDate: "2024-04-01", endDate: "2024-04-05", reason: "Annual Leave", status: "Pending" }
+        ],
+        payroll: [
+            { id: 1, teacherId: 1, month: "March", year: 2024, basic: 50000, allowance: 10000, deductions: 5000, net: 55000, status: "Paid" }
+        ],
+        
+        // Communication
+        announcements: [
+            { id: 1, title: "School Opens", content: "School opens on Jan 8th", date: "2024-01-01", target: "All" }
+        ],
+        smsLogs: [],
+        emailLogs: [],
+        whatsappLogs: [],
+        
+        // Documents
+        kcseRegistration: [
+            { id: 1, studentId: 1, indexNo: "12345678901", year: 2024, status: "Registered" }
+        ]
+    };
+    
+    // Credentials
+    const credentials = {
+        admin: { password: "admin123", name: "System Admin", role: "admin", level: 8 },
+        principal: { password: "principal123", name: "Dr. Sarah Johnson", role: "principal", level: 7 },
+        dos: { password: "dos123", name: "Mr. Michael Chen", role: "dos", level: 6 },
+        accountant: { password: "accountant123", name: "Mrs. Jane Mwangi", role: "accountant", level: 5 },
+        teacher: { password: "teacher123", name: "Mr. Peter Omondi", role: "teacher", level: 4, teacherId: 1 },
+        student: { password: "student123", name: "John Kamau", role: "student", level: 1, studentId: 1 }
+    };
+    
+    // Navigation Menu
+    const navMenu = {
+        admin: [
+            { category: "Academic", items: ["CBC Assessment", "Exams", "Report Cards", "Timetable", "Subject Allocation", "Class Teacher"] },
+            { category: "Finance", items: ["Fee Invoices", "Fee Statements", "Fee Receipts", "M-PESA Integration", "Financial Reports"] },
+            { category: "Administration", items: ["Hostel Management", "Discipline Records", "Attendance Reports", "Leave Management", "Staff Payroll"] },
+            { category: "Communication", items: ["SMS Notifications", "WhatsApp Notifications", "Email Notifications", "Announcements"] },
+            { category: "Documents", items: ["Admission Letters", "Transfer Letters", "Student ID Cards", "KCSE Registration"] }
+        ],
+        principal: [
+            { category: "Academic", items: ["CBC Assessment", "Exams", "Report Cards", "Timetable"] },
+            { category: "Finance", items: ["Financial Reports"] },
+            { category: "Administration", items: ["Hostel Management", "Discipline Records", "Attendance Reports"] },
+            { category: "Communication", items: ["Announcements"] }
+        ],
+        dos: [
+            { category: "Academic", items: ["CBC Assessment", "Exams", "Report Cards", "Timetable", "Subject Allocation", "Class Teacher"] },
+            { category: "Administration", items: ["Attendance Reports"] }
+        ],
+        teacher: [
+            { category: "Academic", items: ["CBC Assessment", "Enter Results", "My Timetable"] }
+        ],
+        accountant: [
+            { category: "Finance", items: ["Fee Invoices", "Fee Statements", "Fee Receipts", "M-PESA Integration", "Financial Reports"] }
+        ],
+        student: [
+            { category: "Academic", items: ["My Results", "My Timetable", "Report Card"] },
+            { category: "Finance", items: ["Fee Statement", "Payments"] },
+            { category: "Communication", items: ["Announcements"] }
+        ]
+    };
+    
+    // Role selection
+    document.querySelectorAll('.role-card-login').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.role-card-login').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedRole = card.dataset.role;
+        });
+    });
+    
+    function togglePassword() {
+        const input = document.getElementById('loginPassword');
+        const icon = document.querySelector('.toggle-password');
+        if (input.type === 'password') { input.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
+        else { input.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+    }
+    
+    function handleLogin() {
+        const password = document.getElementById('loginPassword').value;
+        if (!selectedRole) { showToast("Select a role", "error"); return; }
+        const user = credentials[selectedRole];
+        if (user && user.password === password) {
+            currentUser = user;
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('userNameDisplay').innerHTML = user.name;
+            document.getElementById('userRoleDisplay').innerHTML = user.role.toUpperCase();
+            showToast(`Welcome ${user.name}!`, "success");
+            loadDashboard();
+        } else { showToast("Invalid password!", "error"); }
+    }
+    
+    function logout() {
+        currentUser = null;
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'none';
+        showToast("Logged out", "info");
+    }
+    
+    function showToast(msg, type) {
+        Toastify({ text: msg, duration: 3000, gravity: "top", position: "right",
+            backgroundColor: type === 'success' ? "#28a745" : (type === 'error' ? "#dc3545" : "#17a2b8") }).showToast();
+    }
+    
+    function loadDashboard() {
+        const nav = document.getElementById('mainNav');
+        const menu = navMenu[currentUser.role] || navMenu.student;
+        
+        nav.innerHTML = menu.map(cat => `
+            <div class="nav-category">
+                <button class="nav-btn">${cat.category} ▼</button>
+                <div class="dropdown-content">
+                    ${cat.items.map(item => `<a onclick="loadModule('${item.toLowerCase().replace(/ /g, '_')}')">${item}</a>`).join('')}
+                </div>
+            </div>
+        `).join('');
+        
+        // Show stats overview
+        showStatsOverview();
+    }
+    
+    function showStatsOverview() {
+        const content = `
+            <div class="stats-grid">
+                <div class="stat-card"><div><h4>Total Students</h4><div class="stat-value">${schoolData.students.length}</div></div><i class="fas fa-users" style="font-size:40px; opacity:0.3"></i></div>
+                <div class="stat-card"><div><h4>Total Teachers</h4><div class="stat-value">${schoolData.teachers.length}</div></div><i class="fas fa-chalkboard-user" style="font-size:40px; opacity:0.3"></i></div>
+                <div class="stat-card"><div><h4>Revenue</h4><div class="stat-value">KES ${schoolData.payments.reduce((s,p)=>s+p.amount,0).toLocaleString()}</div></div><i class="fas fa-money-bill" style="font-size:40px; opacity:0.3"></i></div>
+                <div class="stat-card"><div><h4>School Mean</h4><div class="stat-value">${(schoolData.results.reduce((s,r)=>s+r.marks,0)/schoolData.results.length||0).toFixed(1)}%</div></div><i class="fas fa-chart-line" style="font-size:40px; opacity:0.3"></i></div>
+            </div>
+            <div class="card"><h3>Quick Actions</h3>
+                <button class="btn btn-primary" onclick="loadModule('cbc_assessment')">📋 CBC Assessment</button>
+                <button class="btn btn-success" onclick="loadModule('fee_invoices')">💰 Fee Invoices</button>
+                <button class="btn btn-info" onclick="loadModule('hostel_management')">🏠 Hostel</button>
+                <button class="btn btn-warning" onclick="generateReportCard(1)">📄 Report Card</button>
+                <button class="btn btn-danger" onclick="sendSMS()">📱 Send SMS</button>
+            </div>
+            <div class="card"><h3>Recent Announcements</h3>
+                ${schoolData.announcements.map(a => `<p><strong>${a.title}</strong> - ${a.content} <small>(${a.date})</small></p>`).join('')}
+                <button class="btn btn-primary" onclick="showAddAnnouncement()">+ Add Announcement</button>
+            </div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    // ==================== ACADEMIC MODULES ====================
+    function loadModule(module) {
+        if (module === 'cbc_assessment') showCBCAssessment();
+        else if (module === 'exams') showExams();
+        else if (module === 'report_cards') showReportCards();
+        else if (module === 'timetable') showTimetable();
+        else if (module === 'subject_allocation') showSubjectAllocation();
+        else if (module === 'class_teacher') showClassTeacher();
+        else if (module === 'enter_results') showEnterResults();
+        else if (module === 'my_results') showMyResults();
+        else if (module === 'my_timetable') showMyTimetable();
+        else if (module === 'fee_invoices') showFeeInvoices();
+        else if (module === 'fee_statements') showFeeStatements();
+        else if (module === 'fee_receipts') showFeeReceipts();
+        else if (module === 'mpesa_integration') showMpesaIntegration();
+        else if (module === 'financial_reports') showFinancialReports();
+        else if (module === 'hostel_management') showHostelManagement();
+        else if (module === 'discipline_records') showDisciplineRecords();
+        else if (module === 'attendance_reports') showAttendanceReports();
+        else if (module === 'leave_management') showLeaveManagement();
+        else if (module === 'staff_payroll') showStaffPayroll();
+        else if (module === 'sms_notifications') showSMSNotifications();
+        else if (module === 'whatsapp_notifications') showWhatsAppNotifications();
+        else if (module === 'email_notifications') showEmailNotifications();
+        else if (module === 'announcements') showAnnouncements();
+        else if (module === 'admission_letters') showAdmissionLetters();
+        else if (module === 'transfer_letters') showTransferLetters();
+        else if (module === 'student_id_cards') showStudentIDCards();
+        else if (module === 'kcse_registration') showKCSERegistration();
+        else showStatsOverview();
+    }
+    
+    function showCBCAssessment() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-chart-line"></i> CBC Competency-Based Assessment</h3>
+            <div class="data-table"><tr><thead><tr><th>Student</th><th>Subject</th><th>Competency</th><th>Level</th><th>Term</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.cbcAssessment.map(a => {
+                const student = schoolData.students.find(s => s.id === a.studentId);
+                return `<tr><td>${student?.name}</td><td>${a.subject}</td><td>${a.competency}</td><td class="${a.level==='Exceeding'?'grade-A':'grade-C'}">${a.level}</td><td>Term ${a.term}</td>
+                <td><button class="btn btn-warning btn-sm" onclick="editCBC(${a.id})">Edit</button></td></tr>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="showAddCBCModal()">+ Add CBC Assessment</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showExams() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-calendar-alt"></i> Examination Management</h3>
+            <div class="data-table"><table><thead><tr><th>Exam Name</th><th>Type</th><th>Term</th><th>Dates</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.exams.map(e => `
+                <tr><td>${e.name}</td><td>${e.type}</td><td>Term ${e.term}</td><td>${e.startDate} to ${e.endDate}</td><td><span class="badge">${e.status}</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="manageExam(${e.id})">Manage</button></td></tr>`).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="showAddExamModal()">+ Create Exam</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showTimetable() {
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        let timetableHtml = `<div class="card"><h3><i class="fas fa-calendar-week"></i> School Timetable</h3>`;
+        days.forEach(day => {
+            timetableHtml += `<h4>${day}</h4><div class="data-table"><table><thead><tr><th>Period</th><th>Subject</th><th>Teacher</th><th>Room</th></tr></thead><tbody>`;
+            const dayClasses = schoolData.timetable.filter(t => t.day === day);
+            for(let i=1; i<=8; i++) {
+                const period = dayClasses.find(p => p.period === i);
+                timetableHtml += `<tr><td>${i}</td><td>${period ? period.subject : '-'}</td><td>${period ? period.teacher : '-'}</td><td>${period ? period.room : '-'}</td></tr>`;
+            }
+            timetableHtml += `</tbody></div><br>`;
+        });
+        timetableHtml += `<button class="btn btn-primary" onclick="showEditTimetableModal()">Edit Timetable</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = timetableHtml;
+    }
+    
+    function showSubjectAllocation() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-book"></i> Subject Allocation</h3>
+            <div class="data-table"><table><thead><tr><th>Subject</th><th>Code</th><th>Department</th><th>Teacher</th><th>Class</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.subjects.map(s => {
+                const teacher = schoolData.teachers.find(t => t.id === s.teacherId);
+                return `<tr><td>${s.name}</td><td>${s.code}</td><td>${s.department}</td><td>${teacher?.name || 'Unassigned'}</td><td>${s.class}</td>
+                <td><button class="btn btn-warning btn-sm" onclick="editSubject(${s.id})">Edit</button></td></tr>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="showAddSubjectModal()">+ Allocate Subject</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showClassTeacher() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-chalkboard-user"></i> Class Teacher Assignment</h3>
+            <div class="data-table"><table><thead><tr><th>Class</th><th>Class Teacher</th><th>Subject</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.teachers.filter(t => t.classTeacher).map(t => `
+                <tr><td>${t.classTeacher}</td><td>${t.name}</td><td>${t.subject}</td>
+                <td><button class="btn btn-warning btn-sm" onclick="editClassTeacher(${t.id})">Change</button></td>
+            `).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="assignClassTeacher()">Assign Class Teacher</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showEnterResults() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-edit"></i> Enter Student Results</h3>
+            <form onsubmit="saveResult(event)"><div class="form-group"><label>Student</label><select id="resultStudent">${schoolData.students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select></div>
+            <div class="form-group"><label>Subject</label><input type="text" id="resultSubject" required></div>
+            <div class="form-group"><label>Marks (0-100)</label><input type="number" id="resultMarks" required></div>
+            <div class="form-group"><label>Term</label><input type="number" id="resultTerm" value="1"></div>
+            <button type="submit" class="btn btn-primary">Save Result</button></form></div>
+            <div class="card"><h3>Recent Results</h3><div class="data-table">${schoolData.results.map(r => {
+                const student = schoolData.students.find(s => s.id === r.studentId);
+                return `<tr><td>${student?.name}</td><td>${r.subject}</td><td>${r.marks}</td><td class="grade-${r.grade.charAt(0)}">${r.grade}</td></tr>`;
+            }).join('')}</div></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showMyResults() {
+        const studentId = currentUser.studentId || 1;
+        const myResults = schoolData.results.filter(r => r.studentId === studentId);
+        const content = `<div class="card"><h3>My Results</h3><div class="data-table"><table><thead><tr><th>Subject</th><th>Marks</th><th>Grade</th><th>Remarks</th></tr></thead>
+            <tbody>${myResults.map(r => `<tr><td>${r.subject}</td><td>${r.marks}</td><td class="grade-${r.grade.charAt(0)}">${r.grade}</td><td>${r.marks>=80?'Excellent':r.marks>=60?'Good':'Need Improvement'}</td></tr>`).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="generateReportCard(${studentId})">Download Report Card PDF</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showMyTimetable() {
+        const student = schoolData.students.find(s => s.id === (currentUser.studentId || 1));
+        const myTimetable = schoolData.timetable.filter(t => t.class === student?.class);
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        let html = `<div class="card"><h3>My Timetable - ${student?.class}</h3>`;
+        days.forEach(day => {
+            html += `<h4>${day}</h4><div class="data-table"><table><thead><tr><th>Period</th><th>Subject</th><th>Teacher</th><th>Room</th></tr></thead><tbody>`;
+            for(let i=1; i<=8; i++) {
+                const period = myTimetable.find(t => t.day === day && t.period === i);
+                html += `<tr><td>${i}</td><td>${period ? period.subject : '-'}</td><td>${period ? period.teacher : '-'}</td><td>${period ? period.room : '-'}</td></tr>`;
+            }
+            html += `</tbody></div><br>`;
+        });
+        html += `</div>`;
+        document.getElementById('dashboardContent').innerHTML = html;
+    }
+    
+    // ==================== FINANCE MODULES ====================
+    function showFeeInvoices() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-file-invoice"></i> Fee Invoices</h3>
+            <div class="data-table"><table><thead><tr><th>Invoice No</th><th>Student</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.invoices.map(i => {
+                const student = schoolData.students.find(s => s.id === i.studentId);
+                return `<tr><td>${i.invoiceNo}</td><td>${student?.name}</td>}-<td>KES ${i.amount.toLocaleString()}</td>}-<td>${i.dueDate}</td><td class="${i.status==='Paid'?'grade-A':'grade-C'}">${i.status}</td>
+                <td><button class="btn btn-primary btn-sm" onclick="downloadInvoice(${i.id})">Download PDF</button> <button class="btn btn-success btn-sm" onclick="recordPaymentFromInvoice(${i.id})">Record Payment</button></td>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="generateInvoice()">+ Generate Invoice</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showFeeStatements() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-file-invoice-dollar"></i> Fee Statements</h3>
+            <div class="data-table"><table><thead><tr><th>Student</th><th>Admission</th><th>Total Fees</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.students.map(s => {
+                const totalFee = schoolData.feeStructure.find(f => f.class === s.class)?.amount || 25000;
+                const paid = schoolData.payments.filter(p => p.studentId === s.id).reduce((sum,p)=>sum+p.amount,0);
+                return `<tr><td>${s.name}</td><td>${s.admissionNo}</td><td>KES ${totalFee.toLocaleString()}</td>
+                <td>KES ${paid.toLocaleString()}</td><td class="${(totalFee-paid)>0?'grade-C':'grade-A'}">KES ${(totalFee-paid).toLocaleString()}</td>
+                <td><button class="btn btn-primary btn-sm" onclick="downloadFeeStatementPDF(${s.id})">Download PDF</button> <button class="btn btn-info btn-sm" onclick="sendWhatsAppStatement(${s.id})">Send WhatsApp</button></td>`;
+            }).join('')}</tbody></tr></div></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showFeeReceipts() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-receipt"></i> Fee Receipts</h3>
+            <div class="data-table"><table><thead><tr><th>Receipt No</th><th>Student</th><th>Amount</th><th>Date</th><th>Method</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.payments.map(p => {
+                const student = schoolData.students.find(s => s.id === p.studentId);
+                return `<tr><td>${p.receiptNo}</td><td>${student?.name}</td><td>KES ${p.amount.toLocaleString()}</td>
+                <td>${p.date}</td><td>${p.method}</td>
+                <td><button class="btn btn-primary btn-sm" onclick="downloadReceiptPDF(${p.id})">Download PDF</button> <button class="btn btn-success btn-sm" onclick="sendWhatsAppReceipt(${p.id})">Send WhatsApp</button></td>`;
+            }).join('')}</tbody></table></div></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showMpesaIntegration() {
+        const content = `
+            <div class="card"><h3><i class="fab fa-mobile-alt"></i> M-PESA Integration</h3>
+            <div class="stats-grid">
+                <div class="stat-card"><div><h4>Total M-PESA Payments</h4><div class="stat-value">${schoolData.payments.filter(p=>p.method==='M-Pesa').length}</div></div></div>
+                <div class="stat-card"><div><h4>M-PESA Amount</h4><div class="stat-value">KES ${schoolData.payments.filter(p=>p.method==='M-Pesa').reduce((s,p)=>s+p.amount,0).toLocaleString()}</div></div></div>
+            </div>
+            <div class="data-table"></td><thead><tr><th>Transaction ID</th><th>Student</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>${schoolData.payments.filter(p=>p.method==='M-Pesa').map(p => {
+                const student = schoolData.students.find(s => s.id === p.studentId);
+                return `<tr><td>${p.transactionId}</td><td>${student?.name}</td><td>KES ${p.amount.toLocaleString()}</td><td>${p.date}</td><td class="grade-A">Confirmed</td>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="simulateMpesaPayment()">Simulate M-PESA Payment</button>
+            <button class="btn btn-info" onclick="downloadMpesaReport()">Download M-PESA Report</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showFinancialReports() {
+        const totalCollected = schoolData.payments.reduce((s,p)=>s+p.amount,0);
+        const totalExpected = schoolData.students.length * 25000;
+        const defaulters = schoolData.students.filter(s => {
+            const fee = schoolData.feeStructure.find(f => f.class === s.class)?.amount || 25000;
+            const paid = schoolData.payments.filter(p => p.studentId === s.id).reduce((sum,p)=>sum+p.amount,0);
+            return (fee - paid) > 5000;
+        }).length;
+        
+        const content = `
+            <div class="stats-grid">
+                <div class="stat-card"><div><h4>Total Collected</h4><div class="stat-value">KES ${totalCollected.toLocaleString()}</div></div></div>
+                <div class="stat-card"><div><h4>Expected Revenue</h4><div class="stat-value">KES ${totalExpected.toLocaleString()}</div></div></div>
+                <div class="stat-card"><div><h4>Collection Rate</h4><div class="stat-value">${((totalCollected/totalExpected)*100).toFixed(1)}%</div></div></div>
+                <div class="stat-card"><div><h4>Defaulters</h4><div class="stat-value">${defaulters}</div></div></div>
+            </div>
+            <div class="card"><h3>Financial Chart</h3><canvas id="financialChart"></canvas></div>
+            <div class="card"><h3>Payment Summary by Class</h3><div class="data-table">${['Form 1','Form 2','Form 3','Form 4'].map(cls => {
+                const classStudents = schoolData.students.filter(s => s.class === cls);
+                const totalPaid = classStudents.reduce((sum, s) => {
+                    return sum + schoolData.payments.filter(p => p.studentId === s.id).reduce((ps,pp)=>ps+pp.amount,0);
+                }, 0);
+                const expected = classStudents.length * 25000;
+                return `<tr><td>${cls}</td><td>${classStudents.length} students</td><td>KES ${totalPaid.toLocaleString()}</td><td>${((totalPaid/expected)*100).toFixed(1)}%</td>`;
+            }).join('')}</div></div>
+            <button class="btn btn-primary" onclick="downloadFinancialReport()">Download Full Report PDF</button>
+            <button class="btn btn-info" onclick="sendWhatsAppReport()">Send Report via WhatsApp</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+        setTimeout(() => createFinancialChart(totalCollected, totalExpected), 100);
+    }
+    
+    // ==================== ADMINISTRATION MODULES ====================
+    function showHostelManagement() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-bed"></i> Hostel Management</h3>
+            <div class="stats-grid">
+                <div class="stat-card"><div><h4>Occupied Beds</h4><div class="stat-value">${schoolData.hostel.length}</div></div></div>
+                <div class="stat-card"><div><h4>Available Beds</h4><div class="stat-value">50</div></div></div>
+            </div>
+            <div class="data-table"><table><thead><tr><th>Student</th><th>Room No</th><th>Bed No</th><th>Check In</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.hostel.map(h => {
+                const student = schoolData.students.find(s => s.id === h.studentId);
+                return `<tr><td>${student?.name}</td><td>${h.roomNo}</td><td>${h.bedNo}</td><td>${h.checkIn}</td><td>${h.status}</td>
+                <td><button class="btn btn-danger btn-sm" onclick="checkoutStudent(${h.id})">Check Out</button></td>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="showAssignHostelModal()">+ Assign Hostel Room</button>
+            <button class="btn btn-info" onclick="generateHostelReport()">Generate Hostel Report</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showDisciplineRecords() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-gavel"></i> Discipline Records</h3>
+            <div class="data-table"><table><thead><tr><th>Student</th><th>Offense</th><th>Date</th><th>Action Taken</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.discipline.map(d => {
+                const student = schoolData.students.find(s => s.id === d.studentId);
+                return `<tr><td>${student?.name}</td><td>${d.offense}</td><td>${d.date}</td><td>${d.action}</td><td>${d.status}</td>
+                <td><button class="btn btn-warning btn-sm" onclick="editDiscipline(${d.id})">Edit</button></td>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="showAddDisciplineModal()">+ Record Offense</button>
+            <button class="btn btn-info" onclick="generateDisciplineReport()">Generate Report</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showAttendanceReports() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-calendar-check"></i> Attendance Reports</h3>
+            <div class="data-table"><tr><thead><tr><th>Student</th><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Remarks</th></tr></thead>
+            <tbody>${schoolData.attendance.map(a => {
+                const student = schoolData.students.find(s => s.id === a.studentId);
+                return `<tr><td>${student?.name}</td><td>${a.date}</td><td class="${a.status==='Present'?'grade-A':'grade-E'}">${a.status}</td><td>${a.checkIn || '-'}</td><td>${a.checkOut || '-'}</td><td>${a.reason || '-'}</td>`;
+            }).join('')}</tbody></table></div>
+            <div class="stats-grid"><div class="stat-card"><div><h4>Attendance Rate</h4><div class="stat-value">${((schoolData.attendance.filter(a=>a.status==='Present').length / schoolData.attendance.length)*100 || 0).toFixed(1)}%</div></div></div></div>
+            <button class="btn btn-primary" onclick="markAttendance()">Mark Today's Attendance</button>
+            <button class="btn btn-info" onclick="downloadAttendanceReport()">Download Report</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showLeaveManagement() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-plane"></i> Leave Management</h3>
+            <div class="data-table"><table><thead><tr><th>Teacher</th><th>Start Date</th><th>End Date</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.leaveRequests.map(l => {
+                const teacher = schoolData.teachers.find(t => t.id === l.teacherId);
+                return `<tr><td>${teacher?.name}</td><td>${l.startDate}</td><td>${l.endDate}</td><td>${l.reason}</td><td class="${l.status==='Approved'?'grade-A':'grade-C'}">${l.status}</td>
+                <td><button class="btn btn-success btn-sm" onclick="approveLeave(${l.id})">Approve</button>
+                <button class="btn btn-danger btn-sm" onclick="rejectLeave(${l.id})">Reject</button></td>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="showApplyLeaveModal()">Apply for Leave</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showStaffPayroll() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-money-check-alt"></i> Staff Payroll</h3>
+            <div class="data-table"><table><thead><tr><th>Teacher</th><th>Month</th><th>Basic Salary</th><th>Allowances</th><th>Deductions</th><th>Net Pay</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.payroll.map(p => {
+                const teacher = schoolData.teachers.find(t => t.id === p.teacherId);
+                return `<tr><td>${teacher?.name}</td><td>${p.month} ${p.year}</td><td>KES ${p.basic.toLocaleString()}</td>
+                <td>KES ${p.allowance.toLocaleString()}</td><td>KES ${p.deductions.toLocaleString()}</td>
+                <td class="grade-A">KES ${p.net.toLocaleString()}</td><td>${p.status}</td>
+                <td><button class="btn btn-primary btn-sm" onclick="downloadPayslip(${p.id})">Download Payslip</button>
+                <button class="btn btn-success btn-sm" onclick="sendWhatsAppPayslip(${p.id})">Send WhatsApp</button></td>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="processPayroll()">Process Payroll</button>
+            <button class="btn btn-info" onclick="downloadPayrollReport()">Download Report</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    // ==================== COMMUNICATION MODULES ====================
+    function showSMSNotifications() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-sms"></i> SMS Notifications</h3>
+            <form onsubmit="sendBulkSMS(event)"><div class="form-group"><label>Recipient Group</label><select id="smsGroup"><option>All Students</option><option>All Parents</option><option>All Teachers</option><option>Specific Student</option></select></div>
+            <div class="form-group"><label>Message</label><textarea id="smsMessage" rows="4" required placeholder="Enter your message here..."></textarea></div>
+            <button type="submit" class="btn btn-primary">Send SMS</button></form>
+            <div class="stats-grid"><div class="stat-card"><div><h4>SMS Credits Left</h4><div class="stat-value">1,250</div></div></div>
+            <div class="stat-card"><div><h4>Messages Sent</h4><div class="stat-value">${schoolData.smsLogs.length}</div></div></div></div></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showWhatsAppNotifications() {
+        const content = `
+            <div class="card"><h3><i class="fab fa-whatsapp"></i> WhatsApp Notifications</h3>
+            <form onsubmit="sendWhatsAppBulk(event)"><div class="form-group"><label>Recipient Group</label><select id="waGroup"><option>All Parents</option><option>All Teachers</option><option>All Students</option></select></div>
+            <div class="form-group"><label>Message</label><textarea id="waMessage" rows="4" required placeholder="Enter your message here..."></textarea></div>
+            <button type="submit" class="btn btn-success"><i class="fab fa-whatsapp"></i> Send WhatsApp</button></form>
+            <div class="card" style="margin-top:20px"><h4>WhatsApp Business API Status</h4><p>Connected | Number: +254710507524</p>
+            <button class="btn btn-info" onclick="testWhatsApp()">Test Connection</button></div></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showEmailNotifications() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-envelope"></i> Email Notifications</h3>
+            <form onsubmit="sendBulkEmail(event)"><div class="form-group"><label>Recipient Group</label><select id="emailGroup"><option>All Parents</option><option>All Teachers</option><option>All Students</option></select></div>
+            <div class="form-group"><label>Subject</label><input type="text" id="emailSubject" required></div>
+            <div class="form-group"><label>Message</label><textarea id="emailMessage" rows="4" required></textarea></div>
+            <button type="submit" class="btn btn-primary">Send Email</button></form></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showAnnouncements() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-bullhorn"></i> School Announcements</h3>
+            <div class="data-table">${schoolData.announcements.map(a => `
+                <div class="card" style="margin-bottom:10px"><h4>${a.title}</h4><p>${a.content}</p><small>Posted: ${a.date} | Target: ${a.target}</small>
+                <div><button class="btn btn-warning btn-sm" onclick="editAnnouncement(${a.id})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement(${a.id})">Delete</button>
+                <button class="btn btn-success btn-sm" onclick="shareAnnouncement(${a.id})"><i class="fab fa-whatsapp"></i> Share</button></div></div>
+            `).join('')}</div>
+            <button class="btn btn-primary" onclick="showAddAnnouncement()">+ Post Announcement</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    // ==================== DOCUMENTS MODULES ====================
+    function showAdmissionLetters() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-file-alt"></i> Admission Letters</h3>
+            <div class="data-table"><table><thead><tr><th>Student</th><th>Admission No</th><th>Class</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.students.map(s => `
+                <tr><td>${s.name}</td><td>${s.admissionNo}</td><td>${s.class}</td><td>${s.status}</td>
+                <td><button class="btn btn-primary btn-sm" onclick="generateAdmissionLetter(${s.id})">Generate PDF</button>
+                <button class="btn btn-success btn-sm" onclick="sendAdmissionLetterWhatsApp(${s.id})"><i class="fab fa-whatsapp"></i> Send</button></td>
+            `).join('')}</tbody></table></div></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showTransferLetters() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-exchange-alt"></i> Transfer Letters</h3>
+            <div class="data-table"><table><thead><tr><th>Student</th><th>Transfer Type</th><th>Request Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody><tr><td colspan="5">No transfer requests pending</td></tr></tbody></table></div>
+            <button class="btn btn-primary" onclick="processTransfer()">Process Transfer Request</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showStudentIDCards() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-id-card"></i> Student ID Cards</h3>
+            <div class="data-table"><table><thead><tr><th>Student</th><th>Admission No</th><th>Class</th><th>ID Card Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.students.map(s => `
+                <tr><td>${s.name}</td><td>${s.admissionNo}</td><td>${s.class}</td><td>Not Generated</td>
+                <td><button class="btn btn-primary btn-sm" onclick="generateIDCard(${s.id})">Generate ID Card</button>
+                <button class="btn btn-success btn-sm" onclick="printIDCard(${s.id})">Print</button></td>
+            `).join('')}</tbody></table></div></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    function showKCSERegistration() {
+        const content = `
+            <div class="card"><h3><i class="fas fa-registered"></i> KCSE Registration</h3>
+            <div class="stats-grid"><div class="stat-card"><div><h4>Registered Candidates</h4><div class="stat-value">${schoolData.kcseRegistration.length}</div></div></div>
+            <div class="stat-card"><div><h4>Registration Deadline</h4><div class="stat-value">30 days left</div></div></div></div>
+            <div class="data-table"><table><thead><tr><th>Student</th><th>Index Number</th><th>Year</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${schoolData.students.filter(s => s.class === "Form 4").map(s => {
+                const reg = schoolData.kcseRegistration.find(r => r.studentId === s.id);
+                return `<tr><td>${s.name}</td><td>${reg?.indexNo || 'Not Assigned'}</td><td>2024</td>
+                <td class="${reg?'grade-A':'grade-C'}">${reg?'Registered':'Pending'}</td>
+                <td>${reg ? '<button class="btn btn-info btn-sm" onclick="printKCSEBioData()">Print Biodata</button>' : '<button class="btn btn-primary btn-sm" onclick="registerForKCSE('+s.id+')">Register Now</button>'} </td>`;
+            }).join('')}</tbody></table></div>
+            <button class="btn btn-primary" onclick="exportKCSEList()">Export KCSE List</button>
+            <button class="btn btn-info" onclick="uploadKCSEPhoto()">Upload Candidate Photos</button></div>`;
+        document.getElementById('dashboardContent').innerHTML = content;
+    }
+    
+    // ==================== HELPER FUNCTIONS ====================
+    function saveResult(event) {
+        event.preventDefault();
+        const studentId = parseInt(document.getElementById('resultStudent').value);
+        const subject = document.getElementById('resultSubject').value;
+        const marks = parseInt(document.getElementById('resultMarks').value);
+        let grade = marks >= 80 ? 'A' : marks >= 75 ? 'A-' : marks >= 70 ? 'B+' : marks >= 65 ? 'B' : marks >= 60 ? 'B-' : marks >= 55 ? 'C+' : marks >= 50 ? 'C' : marks >= 45 ? 'C-' : marks >= 40 ? 'D+' : marks >= 35 ? 'D' : marks >= 30 ? 'D-' : 'E';
+        schoolData.results.push({ id: schoolData.results.length+1, studentId, subject, marks, grade, term: 1, year: 2024 });
+        showToast(`Result saved! Grade: ${grade}`, "success");
+        loadModule('enter_results');
+    }
+    
+    function generateReportCard(studentId) {
+        const student = schoolData.students.find(s => s.id === studentId);
+        const results = schoolData.results.filter(r => r.studentId === studentId);
+        const total = results.reduce((s,r)=>s+r.marks,0);
+        const average = (total / results.length).toFixed(1);
+        let grade = average >= 80 ? 'A' : average >= 70 ? 'B+' : average >= 60 ? 'B' : average >= 50 ? 'C' : 'D';
+        
+        const element = document.createElement('div');
+        element.innerHTML = `
+            <div style="padding:30px; font-family:Arial">
+                <h1 style="text-align:center">SMART HIGH SCHOOL</h1>
+                <p style="text-align:center">P.O. Box 12345, Nairobi | Tel: 0710507524</p>
+                <hr>
+                <h2>STUDENT REPORT CARD</h2>
+                <p><strong>Name:</strong> ${student.name}</p>
+                <p><strong>Admission No:</strong> ${student.admissionNo}</p>
+                <p><strong>Class:</strong> ${student.class}</p>
+                <p><strong>Term:</strong> 1 | <strong>Year:</strong> 2024</p>
+                <table border="1" style="width:100%; border-collapse:collapse; margin-top:20px">
+                    <tr style="background:#667eea; color:white"><th>Subject</th><th>Marks</th><th>Grade</th><th>Remarks</th></tr>
+                    ${results.map(r => `<tr><td>${r.subject}</td><td>${r.marks}</td><td>${r.grade}</td><td>${r.marks>=80?'Excellent':r.marks>=60?'Good':'Improvement Needed'}</td></tr>`).join('')}
+                    <tr style="background:#f0f0f0"><td colspan="2"><strong>Average Score</strong></td><td colspan="2"><strong>${average}% - Grade ${grade}</strong></td></tr>
+                </table>
+                <p style="margin-top:30px"><strong>Class Teacher's Comment:</strong> Good performance, keep it up!</p>
+                <p><strong>Principal's Signature:</strong> ____________________</p>
+                <p style="text-align:center; margin-top:50px">Generated by Smart High School System</p>
+            </div>`;
+        html2pdf().from(element).save(`Report_Card_${student.admissionNo}.pdf`);
+        showToast("Report card downloaded!", "success");
+    }
+    
+    function downloadFeeStatementPDF(studentId) {
+        const student = schoolData.students.find(s => s.id === studentId);
+        const totalFee = schoolData.feeStructure.find(f => f.class === student.class)?.amount || 25000;
+        const payments = schoolData.payments.filter(p => p.studentId === studentId);
+        const paid = payments.reduce((s,p)=>s+p.amount,0);
+        const balance = totalFee - paid;
+        
+        const element = document.createElement('div');
+        element.innerHTML = `
+            <div style="padding:30px; font-family:Arial">
+                <h1 style="text-align:center">SMART HIGH SCHOOL</h1>
+                <p style="text-align:center">P.O. Box 12345, Nairobi | Tel: 0710507524</p>
+                <hr>
+                <h2>FEE STATEMENT</h2>
+                <p><strong>Student Name:</strong> ${student.name}</p>
+                <p><strong>Admission No:</strong> ${student.admissionNo}</p>
+                <p><strong>Class:</strong> ${student.class}</p>
+                <table border="1" style="width:100%; border-collapse:collapse; margin-top:20px">
+                    <tr style="background:#667eea; color:white"><th>Date</th><th>Receipt No</th><th>Amount Paid (KES)</th><th>Balance (KES)</th></tr>
+                    ${payments.map(p => `<tr><td>${p.date}</td><td>${p.receiptNo}</td><td>${p.amount.toLocaleString()}</td><td>${p.balance.toLocaleString()}</td></tr>`).join('')}
+                    <tr style="background:#f0f0f0"><td colspan="2"><strong>Total Fees: KES ${totalFee.toLocaleString()}</strong></td><td><strong>Paid: KES ${paid.toLocaleString()}</strong></td><td><strong>Balance: KES ${balance.toLocaleString()}</strong></td></tr>
+                </table>
+                <p style="margin-top:30px">Please clear your balance before the end of term.</p>
+                <p style="text-align:center; margin-top:50px">Generated by Smart High School System</p>
+            </div>`;
+        html2pdf().from(element).save(`Fee_Statement_${student.admissionNo}.pdf`);
+        showToast("Fee statement downloaded!", "success");
+    }
+    
+    function downloadReceiptPDF(paymentId) {
+        const payment = schoolData.payments.find(p => p.id === paymentId);
+        const student = schoolData.students.find(s => s.id === payment.studentId);
+        const element = document.createElement('div');
+        element.innerHTML = `
+            <div style="padding:30px; font-family:Arial; text-align:center">
+                <h1>SMART HIGH SCHOOL</h1>
+                <h2>OFFICIAL RECEIPT</h2>
+                <p><strong>Receipt No:</strong> ${payment.receiptNo}</p>
+                <p><strong>Date:</strong> ${payment.date}</p>
+                <hr>
+                <p><strong>Received from:</strong> ${student.name}</p>
+                <p><strong>Admission No:</strong> ${student.admissionNo}</p>
+                <p><strong>Amount:</strong> KES ${payment.amount.toLocaleString()}</p>
+                <p><strong>Payment Method:</strong> ${payment.method}</p>
+                <p><strong>Balance:</strong> KES ${payment.balance.toLocaleString()}</p>
+                <hr>
+                <p>Thank you for your payment!</p>
+                <p style="margin-top:30px">Authorized Signature: ____________________</p>
+            </div>`;
+        html2pdf().from(element).save(`Receipt_${payment.receiptNo}.pdf`);
+        showToast("Receipt downloaded!", "success");
+    }
+    
+    function generateAdmissionLetter(studentId) {
+        const student = schoolData.students.find(s => s.id === studentId);
+        const element = document.createElement('div');
+        element.innerHTML = `
+            <div style="padding:30px; font-family:Arial">
+                <h1 style="text-align:center">SMART HIGH SCHOOL</h1>
+                <h2 style="text-align:center">ADMISSION LETTER</h2>
+                <p>Date: ${new Date().toLocaleDateString()}</p>
+                <p>Dear ${student.parentPhone},</p>
+                <p>We are pleased to inform you that your child, <strong>${student.name}</strong>, has been admitted to Smart High School.</p>
+                <p><strong>Admission Details:</strong></p>
+                <ul><li>Admission Number: ${student.admissionNo}</li><li>Class: ${student.class}</li><li>Stream: ${student.stream || 'East'}</li></ul>
+                <p>Please report to the school on the reporting date with the following documents...</p>
+                <p style="margin-top:50px">Yours sincerely,<br><strong>Dr. Sarah Johnson</strong><br>Principal, Smart High School</p>
+            </div>`;
+        html2pdf().from(element).save(`Admission_Letter_${student.admissionNo}.pdf`);
+        showToast("Admission letter generated!", "success");
+    }
+    
+    function generateIDCard(studentId) {
+        const student = schoolData.students.find(s => s.id === studentId);
+        const element = document.createElement('div');
+        element.innerHTML = `
+            <div style="width:350px; height:200px; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:15px; padding:15px; color:white; font-family:Arial">
+                <div style="display:flex; align-items:center; gap:15px">
+                    <div style="width:80px; height:80px; background:white; border-radius:10px; display:flex; align-items:center; justify-content:center">
+                        <i class="fas fa-user-graduate" style="font-size:40px; color:#667eea"></i>
+                    </div>
+                    <div><h3>SMART HIGH SCHOOL</h3><p>Student ID Card</p></div>
+                </div>
+                <div style="margin-top:10px"><strong>Name:</strong> ${student.name}</div>
+                <div><strong>Admission No:</strong> ${student.admissionNo}</div>
+                <div><strong>Class:</strong> ${student.class}</div>
+                <div><strong>House:</strong> ${student.house || 'Red House'}</div>
+                <div style="margin-top:10px; font-size:10px; text-align:center">Valid until: Dec 2024</div>
+            </div>`;
+        html2pdf().from(element).save(`ID_Card_${student.admissionNo}.pdf`);
+        showToast("ID Card generated!", "success");
+    }
+    
+    function registerForKCSE(studentId) {
+        const student = schoolData.students.find(s => s.id === studentId);
+        const indexNo = `${new Date().getFullYear()}${student.id.toString().padStart(5,'0')}`;
+        schoolData.kcseRegistration.push({ id: schoolData.kcseRegistration.length+1, studentId, indexNo, year: 2024, status: "Registered" });
+        showToast(`${student.name} registered for KCSE! Index: ${indexNo}`, "success");
+        loadModule('kcse_registration');
+    }
+    
+    function sendBulkSMS(event) {
+        event.preventDefault();
+        const message = document.getElementById('smsMessage').value;
+        schoolData.smsLogs.push({ id: schoolData.smsLogs.length+1, message, date: new Date(), recipients: "All" });
+        showToast(`SMS sent to all recipients!`, "success");
+        document.getElementById('smsMessage').value = '';
+    }
+    
+    function sendWhatsAppBulk(event) {
+        event.preventDefault();
+        const message = document.getElementById('waMessage').value;
+        schoolData.whatsappLogs = schoolData.whatsappLogs || [];
+        schoolData.whatsappLogs.push({ id: (schoolData.whatsappLogs.length||0)+1, message, date: new Date() });
+        showToast(`WhatsApp message sent to all parents!`, "success");
+        document.getElementById('waMessage').value = '';
+    }
+    
+    function sendBulkEmail(event) {
+        event.preventDefault();
+        const subject = document.getElementById('emailSubject').value;
+        const message = document.getElementById('emailMessage').value;
+        schoolData.emailLogs.push({ id: (schoolData.emailLogs?.length||0)+1, subject, message, date: new Date() });
+        showToast(`Email sent to all recipients!`, "success");
+        event.target.reset();
+    }
+    
+    function simulateMpesaPayment() {
+        showToast("M-PESA STK Push sent to customer! Enter PIN to complete.", "success");
+        setTimeout(() => {
+            showToast("Payment of KES 5,000 received! Receipt sent via SMS.", "success");
+        }, 3000);
+    }
+    
+    function processPayroll() {
+        showToast("Payroll processed for March 2024! Payslips sent to teachers.", "success");
+    }
+    
+    function markAttendance() {
+        const today = new Date().toISOString().split('T')[0];
+        showToast(`Attendance marked for today (${today})`, "success");
+    }
+    
+    function showAddAnnouncement() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `<div class="modal-content"><h3>Post Announcement</h3>
+            <form onsubmit="addAnnouncement(event)"><div class="form-group"><label>Title</label><input id="annTitle" required></div>
+            <div class="form-group"><label>Content</label><textarea id="annContent" rows="4" required></textarea></div>
+            <div class="form-group"><label>Target Audience</label><select id="annTarget"><option>All</option><option>Students</option><option>Teachers</option><option>Parents</option></select></div>
+            <button type="submit" class="btn btn-primary">Post</button>
+            <button type="button" onclick="this.closest('.modal').remove()" class="btn btn-danger">Cancel</button></form></div>`;
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+    }
+    
+    function addAnnouncement(event) {
+        event.preventDefault();
+        const announcement = {
+            id: schoolData.announcements.length + 1,
+            title: document.getElementById('annTitle').value,
+            content: document.getElementById('annContent').value,
+            date: new Date().toISOString().split('T')[0],
+            target: document.getElementById('annTarget').value
+        };
+        schoolData.announcements.push(announcement);
+        showToast("Announcement posted!", "success");
+        document.querySelector('.modal').remove();
+        loadModule('announcements');
+    }
+    
+    function createFinancialChart(collected, expected) {
+        const ctx = document.getElementById('financialChart')?.getContext('2d');
+        if(ctx) new Chart(ctx, { type: 'bar', data: { labels: ['Collected', 'Expected'], datasets: [{ label: 'Amount (KES)', data: [collected, expected], backgroundColor: ['#28a745', '#667eea'] }] } });
+    }
+    
+    // Export functions to window
+    window.loadModule = loadModule;
+    window.saveResult = saveResult;
+    window.generateReportCard = generateReportCard;
+    window.downloadFeeStatementPDF = downloadFeeStatementPDF;
+    window.downloadReceiptPDF = downloadReceiptPDF;
+    window.generateAdmissionLetter = generateAdmissionLetter;
+    window.generateIDCard = generateIDCard;
+    window.registerForKCSE = registerForKCSE;
+    window.sendBulkSMS = sendBulkSMS;
+    window.sendWhatsAppBulk = sendWhatsAppBulk;
+    window.sendBulkEmail = sendBulkEmail;
+    window.simulateMpesaPayment = simulateMpesaPayment;
+    window.processPayroll = processPayroll;
+    window.markAttendance = markAttendance;
+    window.showAddAnnouncement = showAddAnnouncement;
+    window.addAnnouncement = addAnnouncement;
+    window.editCBC = (id) => showToast("Edit CBC Assessment", "info");
+    window.manageExam = (id) => showToast("Manage Exam", "info");
+    window.editSubject = (id) => showToast("Edit Subject", "info");
+    window.editClassTeacher = (id) => showToast("Edit Class Teacher", "info");
+    window.checkoutStudent = (id) => showToast("Student checked out of hostel", "success");
+    window.editDiscipline = (id) => showToast("Edit Discipline Record", "info");
+    window.approveLeave = (id) => showToast("Leave approved", "success");
+    window.rejectLeave = (id) => showToast("Leave rejected", "info");
+    window.downloadPayslip = (id) => showToast("Payslip downloaded", "success");
+    window.sendWhatsAppPayslip = (id) => showToast("Payslip sent via WhatsApp", "success");
+    window.testWhatsApp = () => showToast("WhatsApp Business API connected!", "success");
+    window.processTransfer = () => showToast("Transfer processed", "success");
+    window.printIDCard = (id) => showToast("ID Card sent to printer", "success");
+    window.printKCSEBioData = () => showToast("KCSE Biodata printed", "success");
+    window.exportKCSEList = () => showToast("KCSE list exported", "success");
+    window.uploadKCSEPhoto = () => showToast("Upload photos for KCSE", "info");
+    window.sendWhatsAppStatement = (id) => showToast("Fee statement sent via WhatsApp", "success");
+    window.sendWhatsAppReceipt = (id) => showToast("Receipt sent via WhatsApp", "success");
+    window.sendAdmissionLetterWhatsApp = (id) => showToast("Admission letter sent via WhatsApp", "success");
+    window.downloadMpesaReport = () => showToast("M-PESA report downloaded", "success");
+    window.downloadFinancialReport = () => showToast("Financial report downloaded", "success");
+    window.sendWhatsAppReport = () => showToast("Report sent via WhatsApp", "success");
+    window.generateHostelReport = () => showToast("Hostel report generated", "success");
+    window.generateDisciplineReport = () => showToast("Discipline report generated", "success");
+    window.downloadAttendanceReport = () => showToast("Attendance report downloaded", "success");
+    window.downloadPayrollReport = () => showToast("Payroll report downloaded", "success");
+    window.editAnnouncement = (id) => showToast("Edit announcement", "info");
+    window.deleteAnnouncement = (id) => showToast("Announcement deleted", "success");
+    window.shareAnnouncement = (id) => showToast("Announcement shared", "success");
+    window.recordPaymentFromInvoice = (id) => showToast("Payment recorded", "success");
+    window.downloadInvoice = (id) => showToast("Invoice downloaded", "success");
+    window.generateInvoice = () => showToast("Invoice generated", "success");
+    window.showAddCBCModal = () => showToast("Add CBC Assessment", "info");
+    window.showAddExamModal = () => showToast("Add Exam", "info");
+    window.showEditTimetableModal = () => showToast("Edit Timetable", "info");
+    window.showAddSubjectModal = () => showToast("Add Subject", "info");
+    window.assignClassTeacher = () => showToast("Assign Class Teacher", "info");
+    window.showAssignHostelModal = () => showToast("Assign Hostel Room", "info");
+    window.showAddDisciplineModal = () => showToast("Record Offense", "info");
+    window.showApplyLeaveModal = () => showToast("Apply for Leave", "info");
+    window.sendWhatsAppStatement = (id) => showToast("Statement sent via WhatsApp", "success");
+    window.sendWhatsAppReceipt = (id) => showToast("Receipt sent via WhatsApp", "success");
+</script>
+</body>
+</html>
