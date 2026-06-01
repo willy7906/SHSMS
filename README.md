@@ -1,0 +1,2 @@
+# SHSMS
+School managment
